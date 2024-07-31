@@ -152,6 +152,10 @@ class AgencyManager:
             threads_callbacks=(
                 {"load": lambda: thread_ids, "save": lambda x: thread_ids.update(x)} if thread_ids is not None else None
             ),
+            settings_callbacks={
+                'load': lambda: self._load_settings(),
+                'save': lambda: self._save_settings(agency_config)
+            },
         )
 
         # Store the constructed agency in the cache
@@ -173,3 +177,10 @@ class AgencyManager:
         # FIXME: current limitation: all agents must belong to the current user.
         # to fix: If the agent is a template (agent_flow_spec.user_id is None), it should be copied for the current user
         # (reuse the code from api/agent.py)
+
+    def _load_settings(self):
+        doc = self.storage.db.collection(self.storage.collection_name).get()
+        return doc
+
+    def _save_settings(self, agency_config):
+        return self.storage.save(agency_config)
